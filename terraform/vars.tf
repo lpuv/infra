@@ -6,8 +6,22 @@ variable "api_url" {
     default = "https://192.168.0.25:8006/api2/json"
 }
 #Blank var for use by terraform.tfvars
-variable "token_secret" {
+variable "user" {
 }
-#Blank var for use by terraform.tfvars
-variable "token_id" {
+
+variable "password" {
+}
+
+variable "email" {
+}
+
+variable "bitwarden_id" {
+}
+
+variable "bitwarden_secret" {
+}
+
+
+variable "master_password" {
+
 }
