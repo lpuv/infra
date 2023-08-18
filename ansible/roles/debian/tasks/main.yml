@@ -1,0 +1,58 @@
+---
+- name: 'Update APT package cache'
+  apt:
+    update_cache: yes
+    upgrade: safe
+  
+- name: Install packages
+  apt:
+    package:
+      - git
+      - apt-transport-https
+      - ca-certificates
+      - wget
+      - software-properties-common
+      - gnupg2
+      - curl
+      - python3-pip
+      - unzip
+    state: present
+      
+
+- name: Download fuse-overlayfs
+  ansible.builtin.get_url:
+    url: https://github.com/containers/fuse-overlayfs/releases/latest/download/fuse-overlayfs-x86_64
+    dest: /usr/local/bin/fuse-overlayfs
+    mode: '0755'
+
+- name: Add Apt signing key from official docker repo
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: add docker official repository for Debian Bullseye
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable
+    state: present
+
+- name: Index new repo into the cache
+  become: yes
+  apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+    force_apt_get: yes
+
+- name: actually install docker
+  apt:
+    name: ["docker-ce", "docker-compose-plugin"]
+    state: latest
+
+- name: install docker pip package
+  pip:
+    name:
+      - docker
+      - docker-compose
+  tags: docker
+
+

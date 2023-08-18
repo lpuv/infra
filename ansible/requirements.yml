@@ -1,0 +1,7 @@
+---
+
+collections:
+  - name: community.docker
+    version: 3.4.3
+  - name: community.general
+    version: 7.3.0

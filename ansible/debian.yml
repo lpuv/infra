@@ -1,0 +1,9 @@
+---
+
+- name: Ansible playbook for all our hosts
+  hosts: all
+  roles:
+    - debian
+  remote_user: root
+
+
