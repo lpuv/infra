@@ -36,6 +36,10 @@ data "bitwarden_item_secure_note" "media_password" {
   id = "158f7bb5-196a-4bf9-8c24-b06200105e40"
 }
 
+data "bitwarden_item_secure_note" "libreddit_password" {
+  id = "e5cdb755-0bed-4b03-9a46-b06201719686"
+}
+
 resource "proxmox_lxc" "media" {
   target_node  = "condor"
   hostname = "media"
@@ -80,4 +84,49 @@ resource "proxmox_lxc" "media" {
     ip6 = "manual"
   }
 
+}
+
+resource "proxmox_lxc" "libreddit" {
+  target_node  = "condor"
+  hostname = "libreddit"
+  ostemplate = "iso:vztmpl/debian-11-standard_11.3-1_amd64.tar.zst"
+  unprivileged = true
+  ostype = "debian"
+  password = data.bitwarden_item_secure_note.libreddit_password.notes
+
+  start = true
+
+  cores = 2
+  memory = 1024
+  swap = 2048
+
+  ssh_public_keys = <<-EOF
+  ${var.ssh_key}
+  EOF
+
+  rootfs {
+    storage = "fast-zfs"
+    size = "40G"
+  }
+
+  mountpoint {
+    key = "0"
+    slot = 0
+    storage = "/local-zfs/data"
+    volume = "/local-zfs/data"
+    mp = "/data"
+    size = "600G"
+  }
+
+  features {
+    fuse    = true
+    nesting = true
+  }
+
+  network {
+    name = "eth0"
+    bridge = "vmbr1"
+    ip = "dhcp"
+    ip6 = "manual"
+  }
 }

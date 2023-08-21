@@ -19,13 +19,23 @@
     group: root
     mode: 0700
 
-- name: Create transmission directory
+
+- name: Fix DNS
+  shell: sed -i 's/192.168.1.129/1.1.1.1/' /etc/resolv.conf
+
+- name: Create Arr stack env subdirectories
   ansible.builtin.file:
     state: directory
-    path: "{{ arrstack_env_dir }}/transmission/transmission-home/"
-    owner: root
-    group: root
-    mode: 0700
+    path: "{{ arrstack_env_dir }}/{{ item }}"
+    owner: "{{ arrstack_data_dir_owner }}"
+    group: "{{ arrstack_data_dir_group }}"
+    mode: 0770
+  loop:
+    - transmission/transmission-home
+    - sonarr-hd
+    - sonarr-anime
+    - prowlarr
+    - buildarr
 
 - name: Download flood for transmission
   ansible.builtin.get_url:
@@ -67,6 +77,7 @@
     - media/shows
     - media/anime
   when: arrstack_data_dir_create
+
 
 - name: Create Docker Compose environment file
   ansible.builtin.template:

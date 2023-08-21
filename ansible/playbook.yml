@@ -1,10 +1,18 @@
 ---
 
+- name: Ansible playbook for configuring libreddit
+  hosts: libreddit
+  roles:
+    - role: libreddit
+      tags: libreddit
+
 - name: Ansible playbook for configuring media
   hosts: media
   roles:
-    - media
+    - role: media
+      tags: media
     - role: caddy-ansible
+      tags: media
       caddy_update: true
       caddy_systemd_capabilities_enabled: true
       caddy_systemd_network_dependency: false
@@ -16,12 +24,12 @@
           }
         }
         sonarr.media.internal.craftcat.dev {
-          reverse_proxy http://192.168.1.182:8989  
+          reverse_proxy http://127.0.0.1:8989  
           import cloudflare
         }
         prowlarr.media.internal.craftcat.dev {
           import cloudflare
-          reverse_proxy http://192.168.1.182:9696
+          reverse_proxy http://127.0.0.1:9696
         }
   remote_user: root
 
