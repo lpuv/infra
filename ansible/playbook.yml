@@ -6,6 +6,12 @@
     - role: libreddit
       tags: libreddit
 
+- name: Ansible playbook for configuring whoogle
+  hosts: whoogle
+  roles:
+    - role: whoogle
+      tags: whoogle
+
 - name: Ansible playbook for configuring media
   hosts: media
   roles:

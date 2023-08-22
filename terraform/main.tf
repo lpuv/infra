@@ -40,6 +40,11 @@ data "bitwarden_item_secure_note" "libreddit_password" {
   id = "e5cdb755-0bed-4b03-9a46-b06201719686"
 }
 
+data "bitwarden_item_secure_note" "whoogle_password" {
+  id = "2bf390f3-4675-4fb9-a91b-b066010d1890"
+}
+
+
 resource "proxmox_lxc" "media" {
   target_node  = "condor"
   hostname = "media"
@@ -107,6 +112,52 @@ resource "proxmox_lxc" "libreddit" {
   rootfs {
     storage = "fast-zfs"
     size = "40G"
+  }
+
+  mountpoint {
+    key = "0"
+    slot = 0
+    storage = "/local-zfs/data"
+    volume = "/local-zfs/data"
+    mp = "/data"
+    size = "600G"
+  }
+
+  features {
+    fuse    = true
+    nesting = true
+  }
+
+  network {
+    name = "eth0"
+    bridge = "vmbr1"
+    ip = "dhcp"
+    ip6 = "manual"
+  }
+}
+
+
+resource "proxmox_lxc" "whoogle" {
+  target_node  = "condor"
+  hostname = "whoogle"
+  ostemplate = "iso:vztmpl/debian-11-standard_11.3-1_amd64.tar.zst"
+  unprivileged = true
+  ostype = "debian"
+  password = data.bitwarden_item_secure_note.whoogle_password.notes
+
+  start = true
+
+  cores = 1
+  memory = 512
+  swap = 1024
+
+  ssh_public_keys = <<-EOF
+  ${var.ssh_key}
+  EOF
+
+  rootfs {
+    storage = "fast-zfs"
+    size = "10G"
   }
 
   mountpoint {

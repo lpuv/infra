@@ -1,0 +1,14 @@
+---
+- name: Create Docker Compose
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /root/docker-compose.yml
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Run Docker Compose
+  docker_compose:
+    project_name: whoogle
+    project_src: /root
+    state: present
