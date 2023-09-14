@@ -45,6 +45,10 @@ data "bitwarden_item_secure_note" "whoogle_password" {
 }
 
 
+data "bitwarden_item_secure_note" "mainframe_password" {
+  id = "225290f3-ecf3-4603-957e-b07d0110ed70"
+}
+
 resource "proxmox_lxc" "media" {
   target_node  = "condor"
   hostname = "media"
@@ -144,6 +148,51 @@ resource "proxmox_lxc" "whoogle" {
   unprivileged = true
   ostype = "debian"
   password = data.bitwarden_item_secure_note.whoogle_password.notes
+
+  start = true
+
+  cores = 1
+  memory = 512
+  swap = 1024
+
+  ssh_public_keys = <<-EOF
+  ${var.ssh_key}
+  EOF
+
+  rootfs {
+    storage = "fast-zfs"
+    size = "10G"
+  }
+
+  mountpoint {
+    key = "0"
+    slot = 0
+    storage = "/local-zfs/data"
+    volume = "/local-zfs/data"
+    mp = "/data"
+    size = "600G"
+  }
+
+  features {
+    fuse    = true
+    nesting = true
+  }
+
+  network {
+    name = "eth0"
+    bridge = "vmbr1"
+    ip = "dhcp"
+    ip6 = "manual"
+  }
+}
+
+resource "proxmox_lxc" "mainframe" {
+  target_node  = "condor"
+  hostname = "mainframe"
+  ostemplate = "iso:vztmpl/debian-11-standard_11.3-1_amd64.tar.zst"
+  unprivileged = true
+  ostype = "debian"
+  password = data.bitwarden_item_secure_note.mainframe_password.notes
 
   start = true
 
