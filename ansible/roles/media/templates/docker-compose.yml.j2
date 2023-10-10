@@ -5,6 +5,25 @@ version: "3.7"
 
 services:
 
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Los_Angeles
+      - JELLYFIN_PublishedServerUrl=jellyfin.craftcat.dev #optional
+    volumes:
+      - "./jellyfin:/config"
+      - type: bind
+        source: "{{ arrstack_data_dir }}"
+        target: /data
+
+    ports:
+      - 8096:8096
+    restart: unless-stopped
+
+
   # Transmission instance for downloading torrents.
   transmission:
     image: "{{ arrstack_transmission_container_uri }}:{{ arrstack_transmission_container_tag }}"
