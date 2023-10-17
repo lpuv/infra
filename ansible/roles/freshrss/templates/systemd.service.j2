@@ -1,0 +1,9 @@
+[Unit]
+Description=FreshRSS get new content
+Wants=freshrss.timer
+
+[Service]
+User=www-data
+Type=simple
+ExecStart=/usr/bin/php {{ install_path }}/app/actualize_script.php
+

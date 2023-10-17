@@ -12,6 +12,14 @@
     - role: whoogle
       tags: whoogle
 
+
+- name: Ansible playbook for configuring freshrss
+  hosts: freshrss
+  roles:
+    - role: freshrss
+      tags: freshrss
+
+
 - name: Ansible playbook for configuring media
   hosts: media
   roles:

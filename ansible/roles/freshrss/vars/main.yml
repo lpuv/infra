@@ -1,0 +1,27 @@
+---
+install_path: '/usr/share/freshrss'
+
+domain: 'rss.craftcat.dev'
+
+web_root_folder: '/var/www/html'
+
+packages:
+  - php
+  - php-curl
+  - php-gmp
+  - php-intl
+  - php-mbstring
+  - php-xml
+  - php-zip
+  - php-ctype
+  - php-dom
+  - php-fileinfo
+  - php-iconv
+  - php-json
+  - php-opcache
+  - php-phar
+  - php-simplexml
+  - php-xmlreader
+  - php-xmlwriter
+  - php-tokenizer
+  - php-pgsql

@@ -1,0 +1,120 @@
+---
+- name: Download FreshRSS using Git
+  git:
+    repo: 'https://github.com/FreshRSS/FreshRSS.git'
+    dest: '{{ install_path }}'
+    depth: 1
+
+- name: Install PHP FastCGI to prevent apache from being installed
+  apt:
+    pkg: 'php-fpm'
+    state: latest
+
+- name: Install PHP dependencies
+  apt:
+    pkg: '{{ packages }}'
+    state: latest
+
+# -----------------------------------------------------------------------------
+# Nginx
+# -----------------------------------------------------------------------------
+
+- name: Install Nginx web server
+  apt:
+    pkg: nginx
+    state: latest
+
+- name: Link the exposed folder from FreshRSS into the web root
+  file:
+    src: '{{ install_path }}/p'
+    dest: '{{ web_root_folder }}/p'
+    state: link
+
+- name: Set data directory tree readable by owner and group
+  file:
+    path: '{{ install_path }}/data'
+    owner: www-data
+    group: www-data
+    mode: u=rwX,g=rX,o=
+    recurse: yes
+
+- name: Generate nginx configuration
+  template:
+    src: freshrss_nginx.conf.j2
+    dest: /etc/nginx/sites-available/freshrss
+
+- name: Disable default nginx configuration
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Enable nginx configuration
+  file:
+    src: /etc/nginx/sites-available/freshrss
+    dest: /etc/nginx/sites-enabled/freshrss
+    state: link
+    
+- name: Restart nginx
+  systemd:
+    name: nginx
+    state: restarted
+
+# -----------------------------------------------------------------------------
+# Postgresql
+# -----------------------------------------------------------------------------
+
+- name: Install PostgreSQL database server
+  apt:
+    pkg:
+      - postgresql
+      - python3-psycopg2
+    state: latest
+
+- name: Generate random password
+  set_fact:
+    cacheable: yes
+    dbuser_password: "{{ lookup('password', '/tmp/dbpassword length=24 chars=ascii_letters') }}"
+
+- name: Announce generated password to the user
+  debug:
+    msg: "PostgreSQL user password is {{ dbuser_password }}"
+
+- name: Create PostgreSQL user
+  become: true
+  become_user: postgres
+  postgresql_user:
+    name: freshrss
+    password: "{{ dbuser_password }}"
+    role_attr_flags: CREATEDB,NOSUPERUSER
+
+- name: Create PostgreSQL database
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: freshrss
+    owner: freshrss
+
+# -----------------------------------------------------------------------------
+# Cron
+# -----------------------------------------------------------------------------
+
+- name: Copy systemd timer file to server
+  copy:
+    src: systemd.timer
+    dest: /etc/systemd/system/freshrss.timer
+    owner: root
+    group: root
+
+- name: Copy systemd service file to server
+  template:
+    src: systemd.service.j2
+    dest: /etc/systemd/system/freshrss.service
+    owner: root
+    group: root
+
+- name: Enable timer for updating feeds
+  systemd:
+    name: freshrss.timer
+    state: started
+    enabled: yes
+

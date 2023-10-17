@@ -16,6 +16,7 @@
       - curl
       - python3-pip
       - unzip
+      - sudo
     state: present
       
 
@@ -45,14 +46,14 @@
 
 - name: actually install docker
   apt:
-    name: ["docker-ce", "docker-compose-plugin"]
+    name: ["docker-ce", "docker-compose-plugin", "python3-docker"]
     state: latest
 
-- name: install docker pip package
-  pip:
-    name:
-      - docker
-      - docker-compose
-  tags: docker
+      #- name: install docker pip package
+      #  pip:
+      #    name:
+      #      - docker
+      #      - docker-compose
+      #  tags: docker
 
 
